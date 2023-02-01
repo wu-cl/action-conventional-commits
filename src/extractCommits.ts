@@ -5,7 +5,7 @@ type Commit = {
     message: string;
 };
 
-const extractCommits = async (context): Promise<Commit[]> => {
+const extractCommits = async (context, core): Promise<Commit[]> => {
     // For "push" events, commits can be found in the "context.payload.commits".
     const pushCommits = Array.isArray(get(context, "payload.commits"));
     if (pushCommits) {
@@ -18,6 +18,10 @@ const extractCommits = async (context): Promise<Commit[]> => {
         try {
             const { body } = await got.get(prCommitsUrl, {
                 responseType: "json",
+                headers: {
+                    "Accept": "application/vnd.github+json",
+                    "Authorization": "token " + core.getInput('GITHUB_TOKEN')
+                }
             });
 
             if (Array.isArray(body)) {
